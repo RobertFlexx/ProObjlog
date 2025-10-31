@@ -1,0 +1,14 @@
+/home/robertultramarine/Downloads/ProObjLog/bin/Debug/net9.0/ProObjLog
+/home/robertultramarine/Downloads/ProObjLog/bin/Debug/net9.0/ProObjLog.deps.json
+/home/robertultramarine/Downloads/ProObjLog/bin/Debug/net9.0/ProObjLog.runtimeconfig.json
+/home/robertultramarine/Downloads/ProObjLog/bin/Debug/net9.0/ProObjLog.dll
+/home/robertultramarine/Downloads/ProObjLog/bin/Debug/net9.0/ProObjLog.pdb
+/home/robertultramarine/Downloads/ProObjLog/obj/Debug/net9.0/ProObjLog.GeneratedMSBuildEditorConfig.editorconfig
+/home/robertultramarine/Downloads/ProObjLog/obj/Debug/net9.0/ProObjLog.AssemblyInfoInputs.cache
+/home/robertultramarine/Downloads/ProObjLog/obj/Debug/net9.0/ProObjLog.AssemblyInfo.cs
+/home/robertultramarine/Downloads/ProObjLog/obj/Debug/net9.0/ProObjLog.csproj.CoreCompileInputs.cache
+/home/robertultramarine/Downloads/ProObjLog/obj/Debug/net9.0/ProObjLog.dll
+/home/robertultramarine/Downloads/ProObjLog/obj/Debug/net9.0/refint/ProObjLog.dll
+/home/robertultramarine/Downloads/ProObjLog/obj/Debug/net9.0/ProObjLog.pdb
+/home/robertultramarine/Downloads/ProObjLog/obj/Debug/net9.0/ProObjLog.genruntimeconfig.cache
+/home/robertultramarine/Downloads/ProObjLog/obj/Debug/net9.0/ref/ProObjLog.dll
