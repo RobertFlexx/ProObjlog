@@ -138,6 +138,8 @@ fn log(level: &str, msg: &str) {
 ./ProObjLog console DEBUG "Shell logging works too"
 ```
 
+This pattern could repeat endlessly for every language but the point is: you can easily integrate this logger into existing projects by spawning it as a seperate process.
+
 All of these write to the same file and console output — there’s only **one real logger**.
 
 ---
