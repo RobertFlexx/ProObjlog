@@ -38,10 +38,10 @@ dotnet publish -c Release -o out
 You can use it directly from the command line:
 
 ```bash
-./ProObjLog INFO "This is an info message"
-./ProObjLog WARN "This is a warning message"
-./ProObjLog ERROR "This is an error message"
-./ProObjLog FATAL "This is a fatal message"
+./ProObjLog console INFO "This is an info message"
+./ProObjLog console WARN "This is a warning message"
+./ProObjLog console ERROR "This is an error message"
+./ProObjLog console FATAL "This is a fatal message"
 ```
 
 Output:
@@ -55,7 +55,8 @@ Output:
 
 (Colored in the console!)
 
----
+## What's the difference between console and log?
+Using console will print the log to the console, whereas using log will only write it to the file. Internally it works by changing the printToConsole field of the logger instance.
 
 ## Log to a File
 
@@ -68,7 +69,7 @@ logs/YYYY-MM-DD.log
 Example:
 
 ```bash
-./ProObjLog INFO "Logging to a daily file"
+./ProObjLog console INFO "Logging to a daily file"
 ```
 
 `logs/2025-10-31.log`:
@@ -84,24 +85,24 @@ Example:
 ### Perl:
 
 ```bash
-perl perl/probjlog.pl WARN "Perl talking to C# logger"
+perl perl/probjlog.pl console WARN "Perl talking to C# logger"
 ```
 
 ### Python:
 
 ```python
 import subprocess
-subprocess.run(["./ProObjLog", "ERROR", "Python reporting in!"])
+subprocess.run(["./ProObjLog", "console", "ERROR", "Python reporting in!"])
 
 # Or to make it more streamlined:
-def log(level: str, message: str):
-    subprocess.run(["./ProObjLog", level, message])
+def logAndPrint(level: str, message: str):
+    subprocess.run(["./ProObjLog", "console", level, message])
 ```
 
 ### Bash:
 
 ```bash
-./ProObjLog DEBUG "Shell logging works too"
+./ProObjLog console DEBUG "Shell logging works too"
 ```
 
 All of these write to the same file and console output — there’s only **one real logger**.

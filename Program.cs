@@ -1,3 +1,4 @@
+using System.Diagnostics.Tracing;
 using ProObjLog.Core;
 
 namespace ProObjLog;
@@ -6,18 +7,26 @@ public static class Program
 {
     public static void Main(string[] args)
     {
-        var logger = new LogNode(name: "prObjLog", printToConsole: true);
-
         if (args.Length == 0)
-        {
-            logger.Log(new InfoMessage("no message provided"));
-            Console.WriteLine("usage: ProObjLog <LEVEL> <message...>");
+        { 
+            Console.WriteLine("No message provided.\nUsage: ProObjLog <LEVEL> <message...>");
             return;
         }
 
-        var level = args[0].ToUpperInvariant();
-        var msg = args.Length > 1 ? string.Join(' ', args[1..]) : string.Empty;
+        var level = args[1].ToUpperInvariant();
+        var msg = args.Length > 2 ? string.Join(' ', args[2..]) : string.Empty;
+        var conPrint = true;
 
+        if (args[0].Equals("log", StringComparison.CurrentCultureIgnoreCase)) {
+            conPrint = false;
+        } else if (args[0].Equals("console", StringComparison.CurrentCultureIgnoreCase)) {
+            conPrint = true;
+        } else {
+            Console.WriteLine(Ansi.Red("First value must be log or print."));
+            Environment.Exit(1);
+        }
+
+        var logger = new LogNode(name: "prObjLog", printToConsole: conPrint);
         LogMessage toLog = level switch
         {
             "DEBUG" => new DebugMessage(msg),
