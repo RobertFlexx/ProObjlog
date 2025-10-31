@@ -36,8 +36,7 @@ public sealed class LogNode
 
         LogFilePath = logFile;
 
-        if (Global is null)
-            Global = this;
+        Global ??= this;
     }
 
     public void Log(LogMessage message, bool forcePrint = false)
@@ -62,7 +61,7 @@ public sealed class LogNode
     {
         if (LogFilePath is null) return;
 
-        List<string> lines = new List<string>();
+        List<string> lines = [];
         if (File.Exists(LogFilePath))
             lines = File.ReadAllLines(LogFilePath).ToList();
 
@@ -82,7 +81,7 @@ public sealed class LogNode
 
     public IReadOnlyList<LogMessage> GetMessages() => _messages.AsReadOnly();
 
-    public void LogException(Exception ex)
+    public static void LogException(Exception ex)
     {
         Log(new ExceptionMessage(ex), forcePrint: true);
     }
