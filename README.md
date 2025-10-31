@@ -92,6 +92,10 @@ perl perl/probjlog.pl WARN "Perl talking to C# logger"
 ```python
 import subprocess
 subprocess.run(["./ProObjLog", "ERROR", "Python reporting in!"])
+
+# Or to make it more streamlined:
+def log(level: str, message: str):
+    subprocess.run(["./ProObjLog", level, message])
 ```
 
 ### Bash:
