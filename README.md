@@ -55,6 +55,14 @@ Output:
 
 (Colored in the console!)
 
+Or if you only want to log but not print:
+```bash
+./ProObjLog log INFO "This is an info message"
+./ProObjLog log WARN "This is a warning message"
+./ProObjLog log ERROR "This is an error message"
+./ProObjLog log FATAL "This is a fatal message"
+```
+
 ## What's the difference between console and log?
 Using console will print the log to the console, whereas using log will only write it to the file. Internally it works by changing the printToConsole field of the logger instance.
 
