@@ -107,6 +107,31 @@ def logAndPrint(level: str, message: str):
     subprocess.run(["./ProObjLog", "console", level, message])
 ```
 
+### Go:
+```go
+import "os/exec"
+
+func dbglog(level string, msg string) {
+	err := exec.Command("./ProObjLog", "log", level, msg).Run()
+	if err != nil {
+		// Your error handling goes here
+	}
+}
+```
+
+### Rust:
+
+```rust
+fn log(level: &str, msg: &str) {
+    std::process::Command::new("./ProObjLog")
+        .arg("log")
+        .arg(level)
+        .arg(msg)
+        .spawn()
+        .expect("Error while logging!"); // Or handle error properly with match Result<T, E>
+}
+```
+
 ### Bash:
 
 ```bash
