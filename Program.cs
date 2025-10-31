@@ -4,7 +4,7 @@ namespace ProObjLog;
 
 public static class Program
 {
-    public static int Main(string[] args)
+    public static void Main(string[] args)
     {
         var logger = new LogNode(name: "prObjLog", printToConsole: true);
 
@@ -12,7 +12,7 @@ public static class Program
         {
             logger.Log(new InfoMessage("no message provided"));
             Console.WriteLine("usage: ProObjLog <LEVEL> <message...>");
-            return 1;
+            return;
         }
 
         var level = args[0].ToUpperInvariant();
@@ -29,6 +29,5 @@ public static class Program
         };
 
         logger.Log(toLog);
-        return 0;
     }
 }
