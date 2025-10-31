@@ -4,7 +4,7 @@
 
 ## Notice
 
-This repository is under active development. The main branch may not always be perfectly stable — use tagged releases for production builds.
+This repository is early release. The stable branch may not always be perfectly stable — use tagged releases for production builds.
 
 ## What is this?
 
