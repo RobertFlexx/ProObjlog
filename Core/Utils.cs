@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-
 namespace ProObjLog.Core;
 
 public static class Ansi

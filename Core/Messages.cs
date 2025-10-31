@@ -1,5 +1,3 @@
-using System;
-
 namespace ProObjLog.Core;
 
 public sealed class DebugMessage : LogMessage

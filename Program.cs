@@ -1,4 +1,3 @@
-using System;
 using ProObjLog.Core;
 
 namespace ProObjLog;
