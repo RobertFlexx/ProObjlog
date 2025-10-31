@@ -81,7 +81,7 @@ public sealed class LogNode
 
     public IReadOnlyList<LogMessage> GetMessages() => _messages.AsReadOnly();
 
-    public static void LogException(Exception ex)
+    public void LogException(Exception ex)
     {
         Log(new ExceptionMessage(ex), forcePrint: true);
     }
