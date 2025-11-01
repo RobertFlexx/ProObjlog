@@ -254,3 +254,8 @@ This project is a multilingual reimagining of that concept — rebuilt in C# for
 ## Summary
 
 **ProObjLog** brings ObjLog’s simplicity to *every language* — one logger, one format, one place to read everything. :D
+
+**Active Developers**
+
+* Moritisimor - Commits, and patches.
+* RobertFlexx - Maintainer, original creator.
