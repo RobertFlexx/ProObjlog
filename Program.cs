@@ -7,9 +7,9 @@ public static class Program
 {
     public static void Main(string[] args)
     {
-        if (args.Length == 0)
+        if (args.Length < 3)
         { 
-            Console.WriteLine("No message provided.\nUsage: ProObjLog <LEVEL> <message...>");
+            Console.WriteLine("Not enough args provided. At least 3 required.\nUsage: ProObjLog <log|level> <LEVEL> <message...>");
             return;
         }
 
