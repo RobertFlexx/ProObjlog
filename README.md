@@ -8,7 +8,7 @@ This repository is early release. The stable branch may not always be perfectly 
 
 ## What is this?
 
-**ProObjLog** is a modern, cross-language logging tool written in **C#**, inspired by [Kokonico’s ObjLog](https://github.com/Kokonico/ObjLog).
+**ProObjLog** is a modern, cross-language logging tool written in **C#**, **HEAVILY** inspired by [Kokonico’s ObjLog](https://github.com/Kokonico/ObjLog) (please check out ObjLog).
 It’s designed to be simple, fast, and universal — usable from **any programming language** via a single executable.
 
 No Python runtime. No dependencies. Just one binary.
