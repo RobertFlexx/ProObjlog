@@ -66,9 +66,8 @@ public sealed class LogNode
             lines = File.ReadAllLines(LogFilePath).ToList();
 
         if (lines.Count >= _maxMessagesInFile)
-        {
             lines = lines.Skip(Math.Max(0, lines.Count - (_maxMessagesInFile - 1))).ToList();
-        }
+        
 
         lines.Add($"[{Name}] {message.Format()}");
         File.WriteAllLines(LogFilePath, lines);
