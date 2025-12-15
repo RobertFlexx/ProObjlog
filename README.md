@@ -257,5 +257,5 @@ This project is a multilingual reimagining of that concept — rebuilt in C# for
 
 **Active Developers**
 
-* Moritisimor - Commits, and patches.
-* RobertFlexx - Maintainer, original creator.
+* Moritisimor - Commits, and patches, active developer/maintainer.
+* RobertFlexx - Maintainer, original creator. [INACTIVE]
