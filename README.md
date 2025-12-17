@@ -2,7 +2,7 @@
 Lite version of [ProObjLog](https://github.com/RobertFlexx/ProObjLog) (original project discontinued)
 
 ## Why does this project exist?
-Essentially, I liked ProObjLogger, but I found its codebase to be too complex. That is why I got rid of unnecessary object-orientation and also added quality of life features such as flag-based arguments.
+Essentially, I, Moritisimor, a maintainer of the original project, liked ProObjLogger, but I found its codebase to be too complex. That is why I got rid of unnecessary object-orientation and also added quality of life features such as flag-based arguments.
 
 ## How do I use it?
 It's really similar to the regular ProObjLog, you spawn it as a process and it does the logging for you. 
