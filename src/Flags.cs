@@ -54,6 +54,9 @@ public class Flags
                 case "--noprint":
                     flags.NoPrint = true;
                     break;
+
+                default:
+                    throw new Exception($"Unknown flag {arg}.");
             }
         }
 
