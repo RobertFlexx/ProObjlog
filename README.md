@@ -41,3 +41,16 @@ def log(l: str, m: str) -> None:
 
 log("FATAL", "Error while executing function Foo.")
 ```
+
+## What do the Exit codes mean?
+ProObjLog can certainly fail to log something! 
+This could be due to unknown flags being entered, or the process not having the permissions to write into, or create a directory.
+
+### Code 0
+All went well.
+
+### Code 1
+Something went wrong while parsing flags. Usually because an unknown flag was entered.
+
+### Code 2
+Something went wrong while creating the directory or the log-file. Usually because of missing permissions or malformed/wrong paths.

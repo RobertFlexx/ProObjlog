@@ -12,11 +12,12 @@ public class Program
         catch (Exception e)
         {
             Console.WriteLine(Color.Red(e.Message));
+            Environment.Exit(1);
             return;
         }
 
         if (!flags.NoPrint)
-            Console.WriteLine(Logging.MakeLog(flags));
+            Logging.PrintLog(flags);
 
         try
         {
@@ -24,7 +25,8 @@ public class Program
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            Console.WriteLine(Color.Red(e.Message));
+            Environment.Exit(2);
         }
     }
 }

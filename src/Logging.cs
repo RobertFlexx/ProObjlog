@@ -4,7 +4,7 @@ namespace ProObjLogLite;
 
 public class Logging
 {
-    public static string MakeLog(Flags flags)
+    public static void PrintLog(Flags flags)
     {
         var time = DateTime.Now.ToString("hh:mm:ss tt");
         var date = DateTime.Today.ToLongDateString();
@@ -45,7 +45,7 @@ public class Logging
         log += Color.Blue("\nMessage: ");
         log += Color.Magenta(flags.Message);
 
-        return log;
+        Console.WriteLine(log);
     }
 
     public static void SaveLog(Flags flags)
