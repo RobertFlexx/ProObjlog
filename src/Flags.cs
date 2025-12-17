@@ -32,24 +32,24 @@ public class Flags
                     if (args.IndexOf(arg) + 2 > args.Count)
                         throw new Exception("No level provided after flag");
 
-                flags.Level = args[args.IndexOf(arg) + 1].ToUpper();
-                break;
+                    flags.Level = args[args.IndexOf(arg) + 1].ToUpper();
+                    break;
 
                 case "-m":
                 case "--message":
                     if (args.IndexOf(arg) + 2 > args.Count)
                         throw new Exception("No message provided after flag");
 
-                flags.Message = args[args.IndexOf(arg) + 1];
-                break;
+                    flags.Message = args[args.IndexOf(arg) + 1];
+                    break;
 
                 case "-d":
                 case "--dir":
                     if (args.IndexOf(arg) + 2 > args.Count)
                         throw new Exception("No directory provided after flag");
 
-                flags.Directory = args[args.IndexOf(arg) + 1];
-                break;
+                    flags.Directory = args[args.IndexOf(arg) + 1];
+                    break;
 
                 case "-n":
                 case "--noprint":
