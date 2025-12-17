@@ -22,7 +22,8 @@ public class Flags
             switch (arg)
             {
                 case "--help":
-                    // Actual Help Output is to be implemented.
+                case "-h":
+                    PrintHelp();
                     Environment.Exit(0);
                     break;
 
@@ -43,7 +44,7 @@ public class Flags
                 break;
 
                 case "-d":
-                case "--directory":
+                case "--dir":
                     if (args.IndexOf(arg) + 2 > args.Count)
                         throw new Exception("No directory provided after flag");
 
@@ -61,5 +62,23 @@ public class Flags
         }
 
         return flags;
+    }
+
+    private static void PrintHelp()
+    {
+        Console.WriteLine(Color.Blue("USAGE: ProObjLogLite <OPTIONS>"));
+        Console.WriteLine(Color.Green("FLAGS:"));
+        
+        Console.Write(Color.Magenta("\t-d | --dir"));
+        Console.WriteLine(Color.Yellow("\t=> Sets the directory where the log is to be stored."));
+
+        Console.Write(Color.Magenta("\t-l | --level"));
+        Console.WriteLine(Color.Yellow("\t=> Sets the level of the log."));
+
+        Console.Write(Color.Magenta("\t-m | --message"));
+        Console.WriteLine(Color.Yellow("\t=> Sets the message of the log."));
+
+        Console.Write(Color.Magenta("\t-n | --noprint"));
+        Console.WriteLine(Color.Yellow("\t=> Disables printing to console for the log and only saves it."));
     }
 }
