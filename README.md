@@ -1,56 +1,223 @@
 # ProObjLogLite
-Lite version of [ProObjLog](https://github.com/RobertFlexx/ProObjLog) (original project discontinued)
 
-## Why does this project exist?
-Essentially, I, Moritisimor, a maintainer of the original project, liked ProObjLogger, but I found its codebase to be too complex. That is why I got rid of unnecessary object-orientation and also added quality of life features such as flag-based arguments.
+ProObjLogLite is a fast CLI logger for scripts, apps, and automation pipelines.
 
-## How do I use it?
-It's really similar to the regular ProObjLog, you spawn it as a process and it does the logging for you. 
+- Works across Linux, macOS, and Windows.
+- Works from any language that can run a process.
+- Supports pretty console logs and JSON logs.
 
-### Example
+## Install
+
+### Requirements
+
+- .NET SDK 10+
+
+### Linux / macOS
+
 ```bash
-ProObjLogLite -d ImportantLogs -l INFO -m 'This is a message!'
+./scripts/install.sh
 ```
 
-In this example, we call the program with flag arguments. The flag ```-d``` is the directory where the log is to be stored. 
+Default install path: `~/.local/bin/ProObjLogLite`
 
-```-l``` determines the level, this could be, for example, WARN, INFO, FATAL etc.
+Custom install path:
 
-```-m``` represents the message of the log, this could really be anything you like and depends on what you want to log exactly.
-
-There is also the ```-n``` flag, this ensures that the log will only be saved in the file and not printed to the console.
-
-Logs look like this:
 ```bash
-[06:07:39 PM / Wednesday, December 17, 2025]
-Level: INFO
-Message: This is a message
+./scripts/install.sh /usr/local/bin
 ```
 
-## Why should I use it?
-If you need a simple logger that can easily be integrated into existing apps, this might be for you.
+Uninstall:
 
-Because it is its own program, you can use it from other languages, not just C#. 
+```bash
+./scripts/uninstall.sh
+```
 
-You could, for example, write a function to call ProObjLogLite with parameters. In Python, this could look like this:
+### Windows (PowerShell)
+
+```powershell
+.\scripts\install.ps1
+```
+
+Default install path: `%LOCALAPPDATA%\Programs\ProObjLogLite\ProObjLogLite.exe`
+
+Custom install path:
+
+```powershell
+.\scripts\install.ps1 -InstallDir "C:\Tools\ProObjLogLite"
+```
+
+Uninstall:
+
+```powershell
+.\scripts\uninstall.ps1
+```
+
+## Quick Start
+
+```bash
+ProObjLogLite --level INFO --source web-api --message "Server started"
+```
+
+JSON output:
+
+```bash
+ProObjLogLite --json --source payments --message "Charge accepted"
+```
+
+Read from stdin:
+
+```bash
+printf "build complete" | ProObjLogLite --message - --source ci --json
+```
+
+## Features
+
+- Standard levels: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL`
+- Minimum level filtering: `--min-level`
+- JSON mode: `--json`
+- Source tags: `--source` / `--tag`
+- Event tracing: `--event-id`, `--correlation-id` / `--cid`
+- Extra metadata: repeatable `--context key=value`
+- Exception field: `--exception`
+- UTC + custom timestamp format: `--utc`, `--timestamp-format`
+- Disable ANSI colors: `--no-color`
+- File rotation: `--max-size`, `--max-files`
+- Explicit output file path: `--file`
+- Console-only mode: `--stdout-only`
+- Dry run mode: `--dry-run`
+- Repetition counter: `--count 250`
+- Tamper-evident chain hashes: `--chain-hash`
+- Built-in named timers: `--timer build --timer-start` then `--timer build --timer-stop`
+- Environment presets: `--profile dev|ci|prod`
+- Probabilistic sampling: `--sample-rate 0.25`
+- Secret redaction: `--redact-keys password,token,apiKey`
+- Log type system: `--type event|audit|metric|decision|logic`
+- Smart inference mode: `--smart`
+- Logic conditions: `--when "env == prod"`, `--assert "status == ok"`
+- Decision and metric helpers: `--decision`, `--outcome`, `--metric latency_ms=123`
+- Config template creation: `--init-config`
+- Installed version output: `--version`
+- Supported levels output: `--list-levels`
+
+## CLI Usage
+
+```text
+ProObjLogLite [OPTIONS]
+```
+
+Core:
+
+- `-d, --dir <path>` output directory (default: `logs`)
+- `-l, --level <lvl>` current log level
+- `-m, --message <msg>` message text (`-` reads stdin)
+- `-n, --noprint` write file only
+- `-h, --help` show help
+- `-v, --version` show version
+- `--list-levels` print all supported levels
+- `--init-config` create `proobjloglite.json`
+
+Formatting:
+
+- `--json`
+- `-s, --source <name>`
+- `--utc`
+- `--timestamp-format <fmt>`
+- `--no-color`
+- `--stdout-only`
+- `--dry-run`
+- `--count <n>`
+- `--chain-hash`
+- `--timer <name>`
+- `--timer-start`
+- `--timer-stop`
+- `--profile <dev|ci|prod>`
+- `--sample-rate <0..1>`
+- `--redact-keys a,b,c`
+- `--type <event|audit|metric|decision|logic>`
+- `--smart`
+- `--when <expr>`
+- `--assert <expr>`
+- `--metric name=value`
+- `--decision <name>`
+- `--outcome <value>`
+
+Storage:
+
+- `-f, --file <path>`
+- `--min-level <lvl>`
+- `--max-size <bytes|KB|MB|GB>`
+- `--max-files <n>`
+
+Advanced:
+
+- `--event-id <id>`
+- `--correlation-id <id>` or `--cid <id>`
+- `--exception <text>`
+- `--context key=value` (repeat)
+
+## Config File
+
+Create a config quickly:
+
+```bash
+ProObjLogLite --init-config
+```
+
+You can also write your own `proobjloglite.json` in the current directory:
+
+```json
+{
+  "directory": "logs",
+  "level": "INFO",
+  "minLevel": "TRACE",
+  "jsonOutput": false,
+  "source": "default",
+  "utc": false,
+  "timestampFormat": "yyyy-MM-ddTHH:mm:ss.fffK",
+  "maxFiles": 7
+}
+```
+
+CLI flags override config values.
+
+## Cross-Language Examples
+
+Python:
 
 ```python
 import subprocess
-def log(l: str, m: str) -> None:
-    subprocess.Popen(["ProObjLogLite", "-d", "ErrorLogs", "-l", l, "-m", m])
 
-log("FATAL", "Error while executing function Foo.")
+subprocess.run([
+    "ProObjLogLite",
+    "--json",
+    "--source", "payments",
+    "--event-id", "PAY-2001",
+    "--context", "orderId=1234",
+    "--message", "Charge accepted"
+], check=True)
 ```
 
-## What do the Exit codes mean?
-ProObjLog can certainly fail to log something! 
-This could be due to unknown flags being entered, or the process not having the permissions to write into, or create a directory.
+Node.js:
 
-### Code 0
-All went well.
+```javascript
+import { spawn } from "node:child_process";
 
-### Code 1
-Something went wrong while parsing flags. Usually because an unknown flag was entered.
+spawn("ProObjLogLite", [
+  "--stdout-only",
+  "--json",
+  "--source", "frontend",
+  "--message", "UI loaded"
+]);
+```
 
-### Code 2
-Something went wrong while creating the directory or the log-file. Usually because of missing permissions or malformed/wrong paths.
+Bash:
+
+```bash
+ProObjLogLite --level ERROR --source worker --exception "Timeout" --message "Job failed"
+```
+
+## Exit Codes
+
+- `0`: success
+- `1`: argument or parsing failure
+- `2`: write failure

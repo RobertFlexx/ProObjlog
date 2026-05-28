@@ -1,10 +1,20 @@
 namespace ProObjLogLite;
 
-public class Color
+public static class Color
 {
-    public static string Blue(string s)    => $"[94m{s}[0m";
-    public static string Green(string s)   => $"[92m{s}[0m";
-    public static string Yellow(string s)  => $"[93m{s}[0m";
-    public static string Red(string s)     => $"[91m{s}[0m";
-    public static string Magenta(string s) => $"[95m{s}[0m";
+    public static bool Enabled { get; set; } = true;
+
+    public static string Blue(string s)    => Wrap("\u001b[94m", s);
+    public static string Green(string s)   => Wrap("\u001b[92m", s);
+    public static string Yellow(string s)  => Wrap("\u001b[93m", s);
+    public static string Red(string s)     => Wrap("\u001b[91m", s);
+    public static string Magenta(string s) => Wrap("\u001b[95m", s);
+
+    private static string Wrap(string colorCode, string value)
+    {
+        if (!Enabled)
+            return value;
+
+        return $"{colorCode}{value}\u001b[0m";
+    }
 }
