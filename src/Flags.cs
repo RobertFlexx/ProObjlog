@@ -42,6 +42,8 @@ public class Flags
     public string[] Metrics { get; set; } = [];
     public string? Decision { get; set; }
     public string? Outcome { get; set; }
+    public bool AsyncWrite { get; set; } = true;
+    public bool FireAndForget { get; set; }
 
     public static Flags Parse(string[] args)
     {
@@ -94,6 +96,12 @@ public class Flags
                     break;
                 case "--outcome":
                     flags.Outcome = ReadFlagValue(args, ref i, "decision outcome");
+                    break;
+                case "--sync":
+                    flags.AsyncWrite = false;
+                    break;
+                case "--fire-and-forget":
+                    flags.FireAndForget = true;
                     break;
                 case "-l":
                 case "--level":
@@ -211,6 +219,9 @@ public class Flags
         if (flags.SampleRate is < 0 or > 1)
             throw new ArgumentException("--sample-rate must be between 0 and 1.");
 
+        if (!flags.AsyncWrite && flags.FireAndForget)
+            throw new ArgumentException("--fire-and-forget requires async mode (remove --sync).");
+
         if (flags.LogType is not ("event" or "audit" or "metric" or "decision" or "logic"))
             throw new ArgumentException("--type must be one of: event, audit, metric, decision, logic.");
 
@@ -311,7 +322,7 @@ public class Flags
             "--version" or "-v" or "--list-levels" or "--init-config" or "--dry-run" or "--count" or
             "--chain-hash" or "--timer" or "--timer-start" or "--timer-stop" or "--profile" or
             "--sample-rate" or "--redact-keys" or "--type" or "--smart" or "--assert" or "--when" or
-            "--metric" or "--decision" or "--outcome";
+            "--metric" or "--decision" or "--outcome" or "--sync" or "--fire-and-forget";
     }
 
     private static void AddContext(Dictionary<string, string> context, string pair)
@@ -378,6 +389,8 @@ public class Flags
         PrintFlag("--metric name=value", "Attach numeric metric; repeatable");
         PrintFlag("--decision <name>", "Decision log type helper");
         PrintFlag("--outcome <value>", "Decision outcome value");
+        PrintFlag("--sync", "Disable async writer and use blocking file writes");
+        PrintFlag("--fire-and-forget", "Queue async write and return immediately");
         Console.WriteLine();
         Console.WriteLine(Color.Green("Config file:"));
         Console.WriteLine("  proobjloglite.json in current directory is loaded before CLI flags.");

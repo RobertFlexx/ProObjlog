@@ -78,3 +78,11 @@ Decision + metric logging:
 ProObjLogLite --decision cache_strategy --outcome redis --context region=us-east --message "strategy selected"
 ProObjLogLite --metric latency_ms=143 --metric cpu_pct=78 --message "runtime sample"
 ```
+
+Low-latency async modes:
+
+```bash
+ProObjLogLite --message "async write"                 # default async writer
+ProObjLogLite --fire-and-forget --message "queued"    # return immediately
+ProObjLogLite --sync --message "blocking write"       # force sync mode
+```

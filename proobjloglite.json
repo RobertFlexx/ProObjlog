@@ -1,0 +1,10 @@
+{
+  "directory": "logs",
+  "level": "INFO",
+  "minLevel": "TRACE",
+  "jsonOutput": false,
+  "source": "default",
+  "utc": false,
+  "timestampFormat": "yyyy-MM-ddTHH:mm:ss.fffK",
+  "maxFiles": 7
+}

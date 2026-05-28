@@ -2,7 +2,25 @@ namespace ProObjLogLite;
 
 public static class Logging
 {
+    private sealed class WriteRequest
+    {
+        public required LogEntry Entry { get; init; }
+        public required Flags Flags { get; init; }
+        public TaskCompletionSource<string>? Completion { get; init; }
+    }
+
     private static readonly Random SamplingRandom = Random.Shared;
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, SemaphoreSlim> FileLocks = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly System.Threading.Channels.Channel<WriteRequest> WriteQueue =
+        System.Threading.Channels.Channel.CreateBounded<WriteRequest>(
+            new System.Threading.Channels.BoundedChannelOptions(8192)
+            {
+                FullMode = System.Threading.Channels.BoundedChannelFullMode.Wait,
+                SingleReader = true,
+                SingleWriter = false
+            });
+    private static readonly CancellationTokenSource QueueCts = new();
+    private static readonly Task QueueWorker = Task.Run(() => ProcessQueueAsync(QueueCts.Token));
     public static readonly HashSet<string> KnownLevels =
     [
         "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"
@@ -74,6 +92,86 @@ public static class Logging
         return filePath;
     }
 
+    public static async Task<string> SaveLogAsync(LogEntry entry, Flags flags, CancellationToken cancellationToken = default)
+    {
+        return await ProcessWriteAsync(entry, flags, cancellationToken);
+    }
+
+    public static async Task<string> EnqueueLogAsync(LogEntry entry, Flags flags, bool waitForCompletion, CancellationToken cancellationToken = default)
+    {
+        if (!waitForCompletion)
+        {
+            await WriteQueue.Writer.WriteAsync(new WriteRequest
+            {
+                Entry = entry,
+                Flags = flags
+            }, cancellationToken);
+            return "queued";
+        }
+
+        var tcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+        await WriteQueue.Writer.WriteAsync(new WriteRequest
+        {
+            Entry = entry,
+            Flags = flags,
+            Completion = tcs
+        }, cancellationToken);
+        return await tcs.Task.WaitAsync(cancellationToken);
+    }
+
+    public static async Task FlushAndStopAsync()
+    {
+        WriteQueue.Writer.TryComplete();
+        try
+        {
+            await QueueWorker;
+        }
+        finally
+        {
+            QueueCts.Cancel();
+            QueueCts.Dispose();
+        }
+    }
+
+    private static async Task ProcessQueueAsync(CancellationToken cancellationToken)
+    {
+        await foreach (var request in WriteQueue.Reader.ReadAllAsync(cancellationToken))
+        {
+            try
+            {
+                var path = await ProcessWriteAsync(request.Entry, request.Flags, cancellationToken);
+                request.Completion?.TrySetResult(path);
+            }
+            catch (Exception ex)
+            {
+                request.Completion?.TrySetException(ex);
+            }
+        }
+    }
+
+    private static async Task<string> ProcessWriteAsync(LogEntry entry, Flags flags, CancellationToken cancellationToken)
+    {
+        var filePath = ResolveOutputPath(flags, entry.Timestamp);
+        var fileLock = FileLocks.GetOrAdd(filePath, _ => new SemaphoreSlim(1, 1));
+        await fileLock.WaitAsync(cancellationToken);
+        try
+        {
+            entry = AttachChainHashes(entry, filePath, flags.ChainHash, persist: true);
+
+            var formatter = ResolveFormatter(flags);
+            var output = formatter.Format(entry, flags);
+            if (flags.MaxSizeBytes is not null)
+                RotateIfNeeded(filePath, flags.MaxSizeBytes.Value, flags.MaxFiles);
+
+            await AppendWithRetryAsync(filePath, output + Environment.NewLine, cancellationToken);
+            return filePath;
+        }
+        finally
+        {
+            fileLock.Release();
+        }
+    }
+
     public static LogEntry FinalizeForDisplay(LogEntry entry, Flags flags)
     {
         entry = Redact(entry, flags.RedactKeys);
@@ -124,6 +222,34 @@ public static class Logging
             catch (IOException) when (i < attempts)
             {
                 Thread.Sleep(i * 40);
+            }
+        }
+
+        throw new IOException($"Failed to write to log file '{filePath}' after multiple retries.");
+    }
+
+    private static async Task AppendWithRetryAsync(string filePath, string content, CancellationToken cancellationToken)
+    {
+        const int attempts = 5;
+
+        for (var i = 1; i <= attempts; i++)
+        {
+            try
+            {
+                await using var stream = new FileStream(
+                    filePath,
+                    FileMode.Append,
+                    FileAccess.Write,
+                    FileShare.Read,
+                    bufferSize: 4096,
+                    options: FileOptions.Asynchronous);
+                await using var writer = new StreamWriter(stream);
+                await writer.WriteAsync(content.AsMemory(), cancellationToken);
+                return;
+            }
+            catch (IOException) when (i < attempts)
+            {
+                await Task.Delay(i * 40, cancellationToken);
             }
         }
 

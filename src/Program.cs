@@ -4,6 +4,11 @@ public static class Program
 {
     public static int Main(string[] args)
     {
+        return MainAsync(args).GetAwaiter().GetResult();
+    }
+
+    private static async Task<int> MainAsync(string[] args)
+    {
         Flags flags;
         try
         {
@@ -92,9 +97,24 @@ public static class Program
 
         try
         {
-            var outputPath = Logging.SaveLog(entry, flags);
-            if (!flags.NoPrint)
-                Console.WriteLine(Color.Green($"Saved log to {outputPath}"));
+            if (!flags.AsyncWrite)
+            {
+                var outputPath = Logging.SaveLog(entry, flags);
+                if (!flags.NoPrint)
+                    Console.WriteLine(Color.Green($"Saved log to {outputPath}"));
+            }
+            else if (flags.FireAndForget)
+            {
+                _ = Logging.EnqueueLogAsync(entry, flags, waitForCompletion: false);
+                if (!flags.NoPrint)
+                    Console.WriteLine(Color.Green("Queued async log write."));
+            }
+            else
+            {
+                var outputPath = await Logging.EnqueueLogAsync(entry, flags, waitForCompletion: true);
+                if (!flags.NoPrint)
+                    Console.WriteLine(Color.Green($"Saved log to {outputPath} (async)"));
+            }
         }
         catch (Exception e)
         {

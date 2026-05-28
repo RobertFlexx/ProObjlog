@@ -3,8 +3,9 @@
 ## Linux / macOS
 
 1. Ensure `.NET SDK 10+` is installed.
-2. Run `./scripts/install.sh` from repo root.
-3. Verify with `ProObjLogLite --version`.
+2. If installed via Homebrew, no extra setup is needed. The installer checks common Homebrew `dotnet` paths automatically.
+3. Run `./scripts/install.sh` from repo root.
+4. Verify with `ProObjLogLite --version`.
 
 Optional custom path:
 

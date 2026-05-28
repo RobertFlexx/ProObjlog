@@ -14,6 +14,8 @@ ProObjLogLite is a fast CLI logger for scripts, apps, and automation pipelines.
 
 ### Linux / macOS
 
+`install.sh` auto-detects Homebrew-installed `dotnet` paths on macOS and Linux.
+
 ```bash
 ./scripts/install.sh
 ```
@@ -70,6 +72,22 @@ Read from stdin:
 printf "build complete" | ProObjLogLite --message - --source ci --json
 ```
 
+## Serious World Test Tool
+
+Run the Python integration/stress tool that exercises smart logging, logic logging,
+timers, chain hashing, sampling, redaction, metrics, decisions, profiles, and
+concurrency:
+
+```bash
+python3 tools/proobjlog_world_tester.py --bin ProObjLogLite --workers 6 --iterations 30
+```
+
+Keep generated artifacts for inspection:
+
+```bash
+python3 tools/proobjlog_world_tester.py --bin ProObjLogLite --keep
+```
+
 ## Features
 
 - Standard levels: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL`
@@ -95,6 +113,8 @@ printf "build complete" | ProObjLogLite --message - --source ci --json
 - Smart inference mode: `--smart`
 - Logic conditions: `--when "env == prod"`, `--assert "status == ok"`
 - Decision and metric helpers: `--decision`, `--outcome`, `--metric latency_ms=123`
+- Async low-latency writer (default), optional `--sync`
+- Fire-and-forget mode: `--fire-and-forget`
 - Config template creation: `--init-config`
 - Installed version output: `--version`
 - Supported levels output: `--list-levels`
@@ -140,6 +160,8 @@ Formatting:
 - `--metric name=value`
 - `--decision <name>`
 - `--outcome <value>`
+- `--sync`
+- `--fire-and-forget`
 
 Storage:
 
