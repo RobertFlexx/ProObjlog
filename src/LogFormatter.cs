@@ -12,26 +12,24 @@ public sealed class JsonLogFormatter : ILogFormatter
 {
     public string Format(LogEntry entry, Flags flags)
     {
-        var payload = new
-        {
-            timestamp = entry.Timestamp.ToString(flags.TimestampFormat),
-            level = entry.Level,
-            logType = entry.LogType,
-            source = entry.Source,
-            eventId = entry.EventId,
-            correlationId = entry.CorrelationId,
-            message = entry.Message,
-            exception = entry.Exception,
-            count = entry.Count,
-            previousHash = entry.PreviousHash,
-            entryHash = entry.EntryHash,
-            host = entry.Host,
-            processId = entry.ProcessId,
-            tags = entry.Tags,
-            context = entry.Context
-        };
+        var payload = new LogPayload(
+            entry.Timestamp.ToString(flags.TimestampFormat),
+            entry.Level,
+            entry.LogType,
+            entry.Source,
+            entry.EventId,
+            entry.CorrelationId,
+            entry.Message,
+            entry.Exception,
+            entry.Count,
+            entry.PreviousHash,
+            entry.EntryHash,
+            entry.Host,
+            entry.ProcessId,
+            entry.Tags,
+            entry.Context);
 
-        return JsonSerializer.Serialize(payload);
+        return JsonSerializer.Serialize(payload, JsonContext.Default.LogPayload);
     }
 }
 

@@ -5,40 +5,49 @@ namespace ProObjLogLite;
 public static class TimerStore
 {
     private const string FileName = ".proobjloglite_timers.json";
+    private static readonly object StoreGate = new();
 
     public static void Start(string name, DateTime startedAt)
     {
-        var timers = Load();
-        timers[name] = startedAt;
-        Save(timers);
+        lock (StoreGate)
+        {
+            var path = Path.Combine(Environment.CurrentDirectory, FileName);
+            using var fileLock = FileLock.Acquire(path + ".lock");
+            var timers = Load(path);
+            timers[name] = startedAt;
+            Save(path, timers);
+        }
     }
 
     public static TimeSpan Stop(string name, DateTime endedAt)
     {
-        var timers = Load();
-        if (!timers.TryGetValue(name, out var startedAt))
-            throw new InvalidOperationException($"Timer '{name}' has not been started.");
+        lock (StoreGate)
+        {
+            var path = Path.Combine(Environment.CurrentDirectory, FileName);
+            using var fileLock = FileLock.Acquire(path + ".lock");
+            var timers = Load(path);
+            if (!timers.TryGetValue(name, out var startedAt))
+                throw new InvalidOperationException($"Timer '{name}' has not been started.");
 
-        timers.Remove(name);
-        Save(timers);
-        return endedAt - startedAt;
+            timers.Remove(name);
+            Save(path, timers);
+            return endedAt - startedAt;
+        }
     }
 
-    private static Dictionary<string, DateTime> Load()
+    private static Dictionary<string, DateTime> Load(string path)
     {
-        var path = Path.Combine(Environment.CurrentDirectory, FileName);
         if (!File.Exists(path))
             return new Dictionary<string, DateTime>(StringComparer.Ordinal);
 
         var json = File.ReadAllText(path);
-        var parsed = JsonSerializer.Deserialize<Dictionary<string, DateTime>>(json);
+        var parsed = JsonSerializer.Deserialize<Dictionary<string, DateTime>>(json, JsonContext.Default.DictionaryStringDateTime);
         return parsed ?? new Dictionary<string, DateTime>(StringComparer.Ordinal);
     }
 
-    private static void Save(Dictionary<string, DateTime> timers)
+    private static void Save(string path, Dictionary<string, DateTime> timers)
     {
-        var path = Path.Combine(Environment.CurrentDirectory, FileName);
-        var json = JsonSerializer.Serialize(timers, new JsonSerializerOptions { WriteIndented = true });
+        var json = JsonSerializer.Serialize(timers, JsonContext.Default.DictionaryStringDateTime);
         File.WriteAllText(path, json + Environment.NewLine);
     }
 }

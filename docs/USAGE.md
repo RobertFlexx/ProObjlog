@@ -83,6 +83,6 @@ Low-latency async modes:
 
 ```bash
 ProObjLogLite --message "async write"                 # default async writer
-ProObjLogLite --fire-and-forget --message "queued"    # return immediately
+ProObjLogLite --fire-and-forget --message "queued"    # enqueue and return; queue is flushed before exit
 ProObjLogLite --sync --message "blocking write"       # force sync mode
 ```

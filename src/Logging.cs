@@ -4,8 +4,8 @@ public static class Logging
 {
     private sealed class WriteRequest
     {
-        public required LogEntry Entry { get; init; }
-        public required Flags Flags { get; init; }
+        public LogEntry? Entry { get; init; }
+        public Flags? Flags { get; init; }
         public TaskCompletionSource<string>? Completion { get; init; }
     }
 
@@ -80,16 +80,25 @@ public static class Logging
     public static string SaveLog(LogEntry entry, Flags flags)
     {
         var filePath = ResolveOutputPath(flags, entry.Timestamp);
+        var fileLock = FileLocks.GetOrAdd(filePath, _ => new SemaphoreSlim(1, 1));
+        fileLock.Wait();
+        try
+        {
+            using var crossLock = FileLock.Acquire(filePath + ".lock");
+            entry = AttachChainHashes(entry, filePath, flags.ChainHash, persist: true);
 
-        entry = AttachChainHashes(entry, filePath, flags.ChainHash, persist: true);
+            var formatter = ResolveFormatter(flags);
+            var output = formatter.Format(entry, flags);
+            if (flags.MaxSizeBytes is not null)
+                RotateIfNeeded(filePath, flags.MaxSizeBytes.Value, flags.MaxFiles);
 
-        var formatter = ResolveFormatter(flags);
-        var output = formatter.Format(entry, flags);
-        if (flags.MaxSizeBytes is not null)
-            RotateIfNeeded(filePath, flags.MaxSizeBytes.Value, flags.MaxFiles);
-
-        AppendWithRetry(filePath, output + Environment.NewLine);
-        return filePath;
+            AppendWithRetry(filePath, output + Environment.NewLine);
+            return filePath;
+        }
+        finally
+        {
+            fileLock.Release();
+        }
     }
 
     public static async Task<string> SaveLogAsync(LogEntry entry, Flags flags, CancellationToken cancellationToken = default)
@@ -139,6 +148,12 @@ public static class Logging
         {
             try
             {
+                if (request.Entry is null || request.Flags is null)
+                {
+                    request.Completion?.TrySetResult("flushed");
+                    continue;
+                }
+
                 var path = await ProcessWriteAsync(request.Entry, request.Flags, cancellationToken);
                 request.Completion?.TrySetResult(path);
             }
@@ -149,6 +164,13 @@ public static class Logging
         }
     }
 
+    public static async Task FlushAsync(CancellationToken cancellationToken = default)
+    {
+        var tcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+        await WriteQueue.Writer.WriteAsync(new WriteRequest { Completion = tcs }, cancellationToken);
+        await tcs.Task.WaitAsync(TimeSpan.FromSeconds(10), cancellationToken);
+    }
+
     private static async Task<string> ProcessWriteAsync(LogEntry entry, Flags flags, CancellationToken cancellationToken)
     {
         var filePath = ResolveOutputPath(flags, entry.Timestamp);
@@ -156,6 +178,7 @@ public static class Logging
         await fileLock.WaitAsync(cancellationToken);
         try
         {
+            using var crossLock = FileLock.Acquire(filePath + ".lock");
             entry = AttachChainHashes(entry, filePath, flags.ChainHash, persist: true);
 
             var formatter = ResolveFormatter(flags);

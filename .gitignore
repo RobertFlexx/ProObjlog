@@ -8,3 +8,8 @@ obj
 
 # Scripts
 scripts
+# Runtime lock files
+*.lock
+
+# AOT debug symbols
+.publish/*.dbg

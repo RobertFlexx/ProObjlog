@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import random
+import shutil
 import string
 import subprocess
 import sys
@@ -38,8 +39,6 @@ class RunStats:
         self.return_codes[rc] = self.return_codes.get(rc, 0) + 1
         if rc in expected:
             self.passed += 1
-            if rc == 0:
-                self.skipped += 0
         else:
             self.failed += 1
 
@@ -254,32 +253,36 @@ def scenario_concurrency(bin_path: str, work_dir: Path, workers: int, iterations
     def worker(wid: int) -> None:
         local_rand = random.Random(wid * 997 + int(time.time()))
         for i in range(iterations):
-            msg = f"worker={wid} seq={i} level noise check"
-            level = local_rand.choice(LEVELS)
-            args = [
-                "--dir",
-                str(work_dir / "concurrency"),
-                "--source",
-                f"stress-worker-{wid}",
-                "--level",
-                level,
-                "--json",
-                "--message",
-                msg,
-                "--count",
-                str(local_rand.randint(1, 5)),
-                "--sample-rate",
-                "0.9",
-                "--chain-hash",
-                "--max-size",
-                "64KB",
-                "--max-files",
-                "3",
-            ]
-            proc = run_log(bin_path, args)
-            if proc.returncode != 0:
+            try:
+                msg = f"worker={wid} seq={i} level noise check"
+                level = local_rand.choice(LEVELS)
+                args = [
+                    "--dir",
+                    str(work_dir / "concurrency"),
+                    "--source",
+                    f"stress-worker-{wid}",
+                    "--level",
+                    level,
+                    "--json",
+                    "--message",
+                    msg,
+                    "--count",
+                    str(local_rand.randint(1, 5)),
+                    "--sample-rate",
+                    "0.9",
+                    "--chain-hash",
+                    "--max-size",
+                    "64KB",
+                    "--max-files",
+                    "3",
+                ]
+                proc = run_log(bin_path, args)
+                if proc.returncode != 0:
+                    with lock:
+                        errors.append(f"worker={wid} i={i} rc={proc.returncode}")
+            except Exception as exc:
                 with lock:
-                    errors.append(f"worker={wid} i={i} rc={proc.returncode}")
+                    errors.append(f"worker={wid} i={i} {exc!r}")
 
     threads = [threading.Thread(target=worker, args=(i,), daemon=True) for i in range(workers)]
     for t in threads:
@@ -301,8 +304,25 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
+def resolve_bin(candidate: str) -> str:
+    if shutil.which(candidate) or Path(candidate).is_file():
+        return candidate
+
+    candidate_path = Path(candidate)
+    if candidate_path.is_absolute():
+        return candidate
+
+    fallback = Path(__file__).resolve().parent.parent / ".publish" / "ProObjLogLite"
+    if fallback.is_file():
+        print(f"[world-test] '{candidate}' not found; using built binary {fallback}")
+        return str(fallback)
+
+    return candidate
+
+
 def main() -> int:
     args = parse_args()
+    args.bin = resolve_bin(args.bin)
     if args.seed is not None:
         random.seed(args.seed)
 

@@ -95,31 +95,35 @@ public static class Program
         if (flags.StdoutOnly || flags.DryRun)
             return 0;
 
+        string outputPath = "";
         try
         {
-            if (!flags.AsyncWrite)
+            for (var i = 0; i < flags.Count; i++)
             {
-                var outputPath = Logging.SaveLog(entry, flags);
-                if (!flags.NoPrint)
-                    Console.WriteLine(Color.Green($"Saved log to {outputPath}"));
-            }
-            else if (flags.FireAndForget)
-            {
-                _ = Logging.EnqueueLogAsync(entry, flags, waitForCompletion: false);
-                if (!flags.NoPrint)
-                    Console.WriteLine(Color.Green("Queued async log write."));
-            }
-            else
-            {
-                var outputPath = await Logging.EnqueueLogAsync(entry, flags, waitForCompletion: true);
-                if (!flags.NoPrint)
-                    Console.WriteLine(Color.Green($"Saved log to {outputPath} (async)"));
+                var current = Logging.CreateEntry(flags);
+                if (!flags.AsyncWrite)
+                    outputPath = Logging.SaveLog(current, flags);
+                else if (flags.FireAndForget)
+                    _ = Logging.EnqueueLogAsync(current, flags, waitForCompletion: false);
+                else
+                    outputPath = await Logging.EnqueueLogAsync(current, flags, waitForCompletion: true);
             }
         }
         catch (Exception e)
         {
             Console.WriteLine(Color.Red($"Write error: {e.Message}"));
+            await Logging.FlushAsync();
             return 2;
+        }
+
+        await Logging.FlushAsync();
+
+        if (!flags.NoPrint)
+        {
+            if (flags.FireAndForget)
+                Console.WriteLine(Color.Green("Queued async log write."));
+            else
+                Console.WriteLine(Color.Green($"Saved log to {outputPath}{(flags.AsyncWrite ? " (async)" : "")}"));
         }
 
         return 0;

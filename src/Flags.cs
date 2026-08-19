@@ -268,10 +268,7 @@ public class Flags
             return new Flags();
 
         var json = File.ReadAllText(path);
-        var loaded = JsonSerializer.Deserialize<Flags>(json, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
+        var loaded = JsonSerializer.Deserialize<Flags>(json, JsonContext.Default.Flags);
 
         return loaded ?? new Flags();
     }
